@@ -9,6 +9,7 @@ from matplotlib.patches import FancyBboxPatch
 from paths import GOLD, IMAGES, SILVER
 
 BLUE, ORANGE, INK, MUTED, SURFACE = "#2a78d6", "#eb6834", "#0b0b0b", "#52514e", "#fcfcfb"
+ALERT = "#d03b3b"  # rouge « alerte », le même que dans le dashboard et les slides
 plt.rcParams.update({"font.size": 10, "text.color": INK, "axes.edgecolor": MUTED,
                      "axes.labelcolor": MUTED, "xtick.color": MUTED, "ytick.color": MUTED,
                      "figure.facecolor": SURFACE, "axes.facecolor": SURFACE})
@@ -120,7 +121,7 @@ fig.savefig(IMAGES / "04_modele_etoile.png", dpi=150, bbox_inches="tight")
 # 5. Contrôle du résultat : écart de CA par catégorie
 kpi = pd.read_csv(GOLD / "kpi_category_n_vs_n1.csv").sort_values("revenue_gap")
 fig, ax = plt.subplots(figsize=(9, 3.8))
-colors = [ORANGE if alert else BLUE for alert in kpi["revenue_alert"]]
+colors = [ALERT if alert else BLUE for alert in kpi["revenue_alert"]]
 ax.barh(kpi["category_name"], kpi["revenue_gap"] / 1000, color=colors, height=0.6)
 ax.axvline(0, color=MUTED, lw=1)
 for i, (gap, evo) in enumerate(zip(kpi["revenue_gap"], kpi["revenue_evol_pct"])):
@@ -128,7 +129,7 @@ for i, (gap, evo) in enumerate(zip(kpi["revenue_gap"], kpi["revenue_evol_pct"]))
             va="center", ha="left" if gap > 0 else "right", fontsize=9)
 for i, alert in enumerate(kpi["revenue_alert"]):
     if alert:
-        ax.text(1.5, i, "Alerte : baisse > 15 %", va="center", fontsize=9, weight="bold")
+        ax.text(1.5, i, "Alerte : baisse ≥ 15 %", va="center", fontsize=9, weight="bold")
 ax.set_xlim(-45, 85)
 ax.set_xlabel("Écart de CA N vs N-1 (milliers de RMB)")
 ax.set_title("Résultat Gold · Écart de CA par catégorie (07/22–06/23 vs 07/21–06/22)", loc="left", weight="bold")
