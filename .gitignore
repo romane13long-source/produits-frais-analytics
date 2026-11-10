@@ -1,0 +1,5 @@
+.venv/
+__pycache__/
+.DS_Store
+# Données : non versionnées (droits de diffusion non vérifiés, transaction.csv = 52 Mo)
+data/
