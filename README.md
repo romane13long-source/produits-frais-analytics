@@ -2,6 +2,8 @@
 
 Exercice 2 du cours Data Analytics (Eugenia School). Ce repo transforme 4 fichiers bruts (ventes en caisse, produits, prix de gros, taux de perte) en un **modèle en étoile** propre, prêt pour le dashboard du Comex.
 
+**➡️ Dashboard en ligne : https://romane13long-source.github.io/produits-frais-analytics/dashboard.html** · slides : [`docs/Comex_produits_frais.pptx`](docs/Comex_produits_frais.pptx) (exercice 3)
+
 **Besoin métier (exercice 1).** Le directeur commercial signale que certaines catégories de produits frais sous-performent. Le Comex demande, pour les ventes magasin sur les 12 derniers mois : **CA, marge et volume**, avec l'**écart en valeur** et l'**évolution en %** par rapport à N-1. Il fixe un seuil d'alerte : une **baisse de 15 % ou plus** par rapport à N-1 est jugée significative.
 
 > ⚠️ Les données s'arrêtent au **30/06/2023**. La période « N » est donc **07/2022 → 06/2023**, comparée à **07/2021 → 06/2022**.
@@ -167,7 +169,7 @@ Deux livrables, régénérés par `run_pipeline.py` à partir du Gold (aucun chi
 
 | Livrable | Fichier | Script |
 |---|---|---|
-| Dashboard interactif | [`docs/dashboard.html`](docs/dashboard.html) : s'ouvre en double-clic dans un navigateur, sans connexion | `src/build_dashboard.py` + `src/dashboard_template.html` |
+| Dashboard interactif | [en ligne](https://romane13long-source.github.io/produits-frais-analytics/dashboard.html) (GitHub Pages, publié depuis `main` / `docs`), ou [`docs/dashboard.html`](docs/dashboard.html) en double-clic, sans connexion | `src/build_dashboard.py` + `src/dashboard_template.html` |
 | Présentation (5 slides + 1 annexe, notes orales incluses) | [`docs/Comex_produits_frais.pptx`](docs/Comex_produits_frais.pptx) : PowerPoint, Keynote ou Google Slides (Fichier > Importer) | `src/build_slides.py` |
 
 **Le message :** le CA progresse de +24 % ; seule **Solanum** passe sous le seuil d'alerte (CA −31,5 %). Elle perd du **volume**, pas du prix (9,10 → 9,01 RMB/kg), surtout de septembre à décembre 2022, et **2 produits** (Changxianqie, Eggplant (2)) pèsent plus que toute la baisse. Recommandation : comprendre leur décrochage avec les achats, tester le retour des promos (0,3 % des ventes en N contre 5,4 % en N-1, hypothèse à mesurer), suivre chaque mois avec le dashboard.
