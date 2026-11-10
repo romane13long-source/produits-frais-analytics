@@ -1,10 +1,7 @@
 """Silver -> Gold : modèle en étoile pour le dashboard (1 table de faits + 3 dimensions)."""
 import pandas as pd
 
-from paths import GOLD, SILVER
-
-# Seuil Comex : une baisse vs N-1 est jugée significative à partir de -15 %
-ALERT_THRESHOLD_PCT = -15
+from paths import ALERT_THRESHOLD_PCT, GOLD, SILVER
 
 product = pd.read_csv(SILVER / "product.csv", dtype=str)
 loss = pd.read_csv(SILVER / "loss_rate.csv", dtype={"item_code": str})

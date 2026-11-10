@@ -158,3 +158,42 @@ feature/gold-model ────────────────┘
 - Chaque fichier de nettoyage est un **script séparé** : les branches ne modifient jamais le même fichier, donc les fusions se font **sans conflit**, même à deux.
 - Les branches sont fusionnées dans `develop` avec `--no-ff`, ce qui garde la trace de chaque contribution dans l'historique.
 - `main` ne reçoit que `develop`, une fois le pipeline complet testé de bout en bout.
+
+---
+
+## Exercice 3 : restitution au Comex
+
+Deux livrables, régénérés par `run_pipeline.py` à partir du Gold (aucun chiffre tapé à la main) :
+
+| Livrable | Fichier | Script |
+|---|---|---|
+| Dashboard interactif | [`docs/dashboard.html`](docs/dashboard.html) : s'ouvre en double-clic dans un navigateur, sans connexion | `src/build_dashboard.py` + `src/dashboard_template.html` |
+| Présentation (5 slides + 1 annexe, notes orales incluses) | [`docs/Comex_produits_frais.pptx`](docs/Comex_produits_frais.pptx) : PowerPoint, Keynote ou Google Slides (Fichier > Importer) | `src/build_slides.py` |
+
+**Le message :** le CA progresse de +24 % ; seule **Solanum** passe sous le seuil d'alerte (CA −31,5 %). Elle perd du **volume**, pas du prix (9,10 → 9,01 RMB/kg), surtout de septembre à décembre 2022, et **2 produits** (Changxianqie, Eggplant (2)) pèsent plus que toute la baisse. Recommandation : comprendre leur décrochage avec les achats, tester le retour des promos (0,3 % des ventes en N contre 5,4 % en N-1, hypothèse à mesurer), suivre chaque mois avec le dashboard.
+
+**Dashboard : une question par zone.**
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│ Bandeau : « 1 catégorie en alerte : Solanum (CA −31,5 %) »   │  le signal
+├──────────────────────────────────────────────────────────────┤
+│ Filtres : [CA | Marge brute | Volume]   [Catégorie ▾]        │
+├──────────────┬──────────────┬──────────────┬─────────────────┤
+│ CA N         │ Marge N      │ Volume N     │ Part en promo   │  combien ?
+├──────────────┴──────────────┼──────────────┴─────────────────┤
+│ Évolution vs N-1 par        │ Courbe mensuelle N vs N-1      │  qui ? / quand ?
+│ catégorie (seuil −15 %)     │                                │
+├─────────────────────────────┴────────────────────────────────┤
+│ Écart vs N-1 par produit (top 8)                             │  quels produits ?
+└──────────────────────────────────────────────────────────────┘
+```
+
+Règles de visualisation du cours appliquées :
+- **Rester simple.** Deux filtres seulement.
+- **Surligner l'essentiel.** Seule l'alerte est en rouge, toujours avec ⚠ et le mot « Alerte », jamais par la couleur seule.
+- **Le bon graphique.** Barres horizontales pour les noms longs, courbe pour le temps, pas de camembert.
+- **Le bon niveau de détail.** Les % produits de plus de 10× sont remplacés par « nouveau » ou « quasi arrêté ».
+- **Cohérence.** Mêmes couleurs dans le dashboard, les slides et les images de ce README.
+- **Mode sombre.** Le dashboard le gère.
+- **Tableau complet.** Il est disponible sous les graphiques.
