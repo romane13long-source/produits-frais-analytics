@@ -2,7 +2,7 @@
 
 Exercice 2 du cours Data Analytics (Eugenia School). Ce repo transforme 4 fichiers bruts (ventes en caisse, produits, prix de gros, taux de perte) en un **modèle en étoile** propre, prêt pour le dashboard du Comex.
 
-**Besoin métier (exercice 1).** Le directeur commercial signale que certaines catégories de produits frais sous-performent. Le Comex demande, pour les ventes magasin sur les 12 derniers mois : **CA, marge et volume**, avec l'**écart en valeur** et l'**évolution en %** par rapport à N-1. Il fixe un seuil d'alerte à **15 %**.
+**Besoin métier (exercice 1).** Le directeur commercial signale que certaines catégories de produits frais sous-performent. Le Comex demande, pour les ventes magasin sur les 12 derniers mois : **CA, marge et volume**, avec l'**écart en valeur** et l'**évolution en %** par rapport à N-1. Il fixe un seuil d'alerte : une **baisse de 15 % ou plus** par rapport à N-1 est jugée significative.
 
 > ⚠️ Les données s'arrêtent au **30/06/2023**. La période « N » est donc **07/2022 → 06/2023**, comparée à **07/2021 → 06/2022**.
 
@@ -74,7 +74,6 @@ Le projet a été réalisé en binôme. Chaque membre est responsable de 2 fichi
 | Les 251 taux sont du texte suivi d'un espace (`"4.39 "`) | Convertis en nombre, contrôle entre 0 et 100 | Indispensable pour tout calcul |
 | `Item Name` en double avec product.csv (vérifié identique) | Colonne supprimée | Une seule source de vérité pour le nom |
 | 22 produits à 0 % de perte | Gardés, signalés (`loss_rate_to_check`) | 0 % de perte sur du frais est peu crédible : à vérifier avec le métier |
-| Seuil Comex | Colonne `above_15_pct` (29 produits) | Le Comex considère problématique une perte supérieure à 15 % |
 
 ---
 
@@ -91,7 +90,7 @@ Le projet a été réalisé en binôme. Chaque membre est responsable de 2 fichi
 - **Table de faits `fact_sales`** : une ligne par article scanné en caisse. Elle contient les **mesures additives** : quantité, CA, coût d'achat, marge.
 - **Dimensions** : les axes d'analyse.
   - `dim_date` : année, mois, jour de la semaine, période N / N-1.
-  - `dim_product` : nom, libellé, taux de perte, drapeau > 15 %.
+  - `dim_product` : nom, libellé, taux de perte, drapeau « 0 % à vérifier ».
   - `dim_category` : les 6 catégories.
 
 Le taux de perte est rangé dans `dim_product`, car c'est une caractéristique du produit et non de la vente. Son **coût**, en revanche, est calculé ligne par ligne dans la table de faits.
@@ -113,7 +112,7 @@ Le taux de perte est rangé dans `dim_product`, car c'est une caractéristique d
 | Script | Rôle |
 |---|---|
 | `src/clean_*.py` | Bronze → Silver, un script par fichier (étape 1) |
-| `src/build_gold.py` | Silver → Gold : jointures `merge(..., validate=...)` et vue `kpi_category_n_vs_n1.csv` |
+| `src/build_gold.py` | Silver → Gold : jointures `merge(..., validate=...)` et vue `kpi_category_n_vs_n1.csv`, avec une colonne `*_alert` pour chaque KPI (évolution ≤ −15 %) |
 | `run_pipeline.py` | Lance tout dans l'ordre |
 
 Contrôles de cohérence dans le code :
@@ -137,8 +136,8 @@ Contrôles de cohérence dans le code :
 | **Total** | **1 154 272** | **+224 553** | **+24,2 %** | 446 543 | +33,9 % | 191 900 | +66,4 % |
 
 **Premières pistes pour l'exercice 3 :**
-1. **Solanum** est la seule catégorie en recul, en CA comme en volume (environ −31 %).
-2. **Flower/Leaf** : le volume progresse de +64 % mais le CA seulement de +17 %, donc le prix moyen au kg baisse. La catégorie regroupe aussi **18 des 29 produits** dont la perte dépasse 15 %, soit environ 24 k RMB de pertes estimées sur N.
+1. **Solanum** est la **seule catégorie en alerte** : son CA (−31,5 %), sa marge (−24,8 %) et son volume (−30,8 %) baissent tous au-delà du seuil de 15 %.
+2. **Flower/Leaf** n'est pas en alerte, mais c'est un point de vigilance : le volume progresse de +64 % alors que le CA ne gagne que +17 %, donc le prix moyen au kg baisse. C'est aussi la catégorie où les pertes coûtent le plus, environ 24 k RMB estimés sur N.
 
 ---
 
