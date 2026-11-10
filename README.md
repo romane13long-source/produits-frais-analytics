@@ -27,14 +27,15 @@ Les données ne sont pas versionnées : leurs droits de diffusion ne sont pas v�
 
 ## Étape 1 : diagnostic et rôles
 
-Chaque membre de l'équipe est responsable d'un fichier, d'un script et d'une branche :
+Le projet a été réalisé en binôme. Chaque membre est responsable de 2 fichiers, avec un script et une branche par fichier. Le découpage suit le métier : d'un côté **ce qui se vend et ce que ça coûte**, de l'autre **le référentiel produit**.
 
 | Membre | Fichier | Script | Branche |
 |---|---|---|---|
-| 1 | transaction.csv (878 503 lignes) | `src/clean_transaction.py` | `feature/clean-transaction` |
-| 2 | product.csv (251 lignes) | `src/clean_product.py` | `feature/clean-product` |
-| 3 | price.csv (55 982 lignes) | `src/clean_price.py` | `feature/clean-price` |
-| 4 | loss_rate.csv (251 lignes) | `src/clean_loss_rate.py` | `feature/clean-loss-rate` |
+| 1 · ventes & coûts | transaction.csv (878 503 lignes) | `src/clean_transaction.py` | `feature/clean-transaction` |
+| 1 · ventes & coûts | price.csv (55 982 lignes) | `src/clean_price.py` | `feature/clean-price` |
+| 2 · référentiel produit | product.csv (251 lignes) | `src/clean_product.py` | `feature/clean-product` |
+| 2 · référentiel produit | loss_rate.csv (251 lignes) | `src/clean_loss_rate.py` | `feature/clean-loss-rate` |
+| Binôme | modèle en étoile (Gold) | `src/build_gold.py` | `feature/gold-model` |
 
 ![Anomalies détectées](docs/images/01_diagnostic.png)
 
@@ -155,6 +156,6 @@ feature/clean-transaction─┘        │
 feature/gold-model ────────────────┘
 ```
 
-- Chaque fichier de nettoyage est un **script séparé** : les 4 branches ne modifient jamais le même fichier, donc les fusions se font **sans conflit**.
+- Chaque fichier de nettoyage est un **script séparé** : les branches ne modifient jamais le même fichier, donc les fusions se font **sans conflit**, même à deux.
 - Les branches sont fusionnées dans `develop` avec `--no-ff`, ce qui garde la trace de chaque contribution dans l'historique.
 - `main` ne reçoit que `develop`, une fois le pipeline complet testé de bout en bout.
