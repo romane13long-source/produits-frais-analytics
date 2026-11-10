@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Produits frais : Comex</title>
+<style>
+  :root {
+    --surface-0: #f4f4f1; --surface-1: #fcfcfb; --border: #e1e0d9; --axis: #c3c2b7;
+    --text-primary: #0b0b0b; --text-secondary: #52514e; --text-muted: #898781;
+    --series-n: #2a78d6; --series-n1: #a3a29c; --critical: #d03b3b; --good: #0ca30c;
+    --highlight: #eaf2fc;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --surface-0: #111110; --surface-1: #1a1a19; --border: #2c2c2a; --axis: #383835;
+      --text-primary: #f0efec; --text-secondary: #c3c2b7; --text-muted: #898781;
+      --series-n: #3987e5; --series-n1: #6b6a65; --highlight: #1d2a3b;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --surface-0: #111110; --surface-1: #1a1a19; --border: #2c2c2a; --axis: #383835;
+    --text-primary: #f0efec; --text-secondary: #c3c2b7; --text-muted: #898781;
+    --series-n: #3987e5; --series-n1: #6b6a65; --highlight: #1d2a3b;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--surface-0); color: var(--text-primary);
+         font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 24px 16px 40px; }
+  h1 { font-size: 22px; margin: 0; }
+  h2 { font-size: 15px; margin: 0 0 2px; }
+  .sub { color: var(--text-secondary); margin: 2px 0 0; }
+  .headline { margin: 16px 0; padding: 12px 16px; border-left: 4px solid var(--critical);
+              background: var(--surface-1); border-radius: 6px; font-size: 15px; }
+  .filters { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; margin-bottom: 16px; }
+  .filters label { color: var(--text-secondary); font-size: 13px; margin-right: 6px; }
+  .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+  .seg button { border: 0; background: var(--surface-1); color: var(--text-primary); padding: 6px 12px;
+                font: inherit; cursor: pointer; }
+  .seg button + button { border-left: 1px solid var(--border); }
+  .seg button[aria-pressed="true"] { background: var(--series-n); color: #fff; }
+  select { font: inherit; padding: 5px 8px; border: 1px solid var(--border); border-radius: 6px;
+           background: var(--surface-1); color: var(--text-primary); }
+  .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 12px; }
+  .card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  .tile .label { color: var(--text-secondary); font-size: 13px; }
+  .tile .value { font-size: 26px; font-weight: 600; margin: 2px 0; font-variant-numeric: tabular-nums; }
+  .tile .delta { font-size: 13px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+  .badge { display: inline-block; font-size: 12px; font-weight: 600; padding: 1px 6px; border-radius: 4px;
+           margin-left: 6px; color: #fff; background: var(--critical); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .note { color: var(--text-muted); font-size: 12px; margin: 0 0 8px; }
+  svg { display: block; width: 100%; height: auto; overflow: visible; }
+  svg text { fill: var(--text-secondary); font-size: 12px; }
+  .bar-row { cursor: pointer; }
+  .bar-row:focus { outline: none; }
+  .bar-row:focus .hit, .bar-row:hover .hit { fill: var(--highlight); }
+  .legend { display: flex; gap: 16px; font-size: 12px; color: var(--text-secondary); margin: 0 0 6px; }
+  .legend i { display: inline-block; width: 14px; height: 3px; vertical-align: middle; margin-right: 6px; border-radius: 2px; }
+  #tip { position: fixed; pointer-events: none; background: var(--surface-1); border: 1px solid var(--border);
+         border-radius: 6px; padding: 6px 10px; font-size: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.12);
+         display: none; z-index: 10; font-variant-numeric: tabular-nums; }
+  details { margin-top: 12px; }
+  summary { cursor: pointer; color: var(--text-secondary); }
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; font-variant-numeric: tabular-nums; }
+  th, td { padding: 6px 8px; border-bottom: 1px solid var(--border); text-align: right; }
+  th:first-child, td:first-child { text-align: left; }
+  th { color: var(--text-secondary); font-weight: 500; }
+  footer { color: var(--text-muted); font-size: 12px; margin-top: 16px; }
+  @media (max-width: 860px) {
+    .tiles { grid-template-columns: repeat(2, 1fr); }
+    .grid2 { grid-template-columns: 1fr; }
+    .table-wrap { overflow-x: auto; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Produits frais : ventes magasin</h1>
+    <p class="sub" id="period"></p>
+  </header>
+  <p class="headline" id="headline"></p>
+
+  <div class="filters">
+    <div><label>Indicateur</label><span class="seg" id="kpi-seg"></span></div>
+    <div><label for="cat">Catégorie</label><select id="cat"></select></div>
+  </div>
+
+  <section class="tiles" id="tiles"></section>
+
+  <section class="grid2">
+    <div class="card">
+      <h2 id="bars-title"></h2>
+      <p class="note">Cliquer sur une catégorie pour la détailler. Pointillé = seuil d'alerte du Comex.</p>
+      <svg id="bars" role="img"></svg>
+    </div>
+    <div class="card">
+      <h2 id="line-title"></h2>
+      <p class="note">Chaque mois de N est comparé au même mois de N-1.</p>
+      <div class="legend"><span><i style="background:var(--series-n)"></i>N (07/22 – 06/23)</span>
+        <span><i style="background:var(--series-n1)"></i>N-1 (07/21 – 06/22)</span></div>
+      <svg id="line" role="img"></svg>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2 id="prod-title"></h2>
+    <p class="note">Les 8 produits dont l'écart vs N-1 est le plus fort, en valeur absolue.</p>
+    <svg id="prod" role="img"></svg>
+  </section>
+
+  <details class="card">
+    <summary>Voir le tableau complet (toutes catégories)</summary>
+    <div class="table-wrap"><table id="table"></table></div>
+  </details>
+
+  <footer>
+    Source : caisses magasin (transaction.csv), prix de gros du jour (price.csv), référentiel (product.csv).
+    Données nettoyées par le pipeline du repo produits-frais-analytics.
+    Marge brute = CA − kg vendus × prix de gros du jour, hors pertes. RMB = yuan.
+  </footer>
+</main>
+<div id="tip"></div>
+
+<script>
+const DATA = /*__DATA__*/null;
+const KPI = {
+  revenue: { label: "CA", of: "du CA", unit: "RMB" },
+  gross_margin: { label: "Marge brute", of: "de la marge brute", unit: "RMB" },
+  quantity_kg: { label: "Volume vendu", of: "du volume vendu", unit: "kg" },
+};
+const MONTHS = ["juil.", "août", "sept.", "oct.", "nov.", "déc.", "janv.", "févr.", "mars", "avr.", "mai", "juin"];
+const state = { kpi: "revenue", cat: "Toutes" };
+const SVGNS = "http://www.w3.org/2000/svg";
+const nf0 = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 });
+const nf1 = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 1, minimumFractionDigits: 1 });
+
+const evol = (n, n1) => (n1 ? (n / n1 - 1) * 100 : null);
+const fmtPct = v => (v === null ? "nouveau" : (v > 0 ? "+" : v < 0 ? "−" : "") + nf1.format(Math.abs(v)) + " %");
+const fmtGap = v => (v > 0 ? "+" : v < 0 ? "−" : "") + fmtVal(Math.abs(v));
+function fmtVal(v) {
+  return Math.abs(v) >= 1000 ? nf1.format(v / 1000) + " k" : nf0.format(v);
+}
+// Un produit presque absent d'une des deux périodes donne des % énormes et trompeurs
+const productEvol = r => (r.n1 < r.n * 0.1 ? "nouveau en N" : r.n < r.n1 * 0.1 ? "quasi arrêté en N" : fmtPct(evol(r.n, r.n1)));
+const isAlert = v => v !== null && v <= DATA.threshold;
+const cat = name => DATA.categories.find(c => c.category_name === name);
+
+function el(tag, attrs = {}, parent) {
+  const node = document.createElementNS(SVGNS, tag);
+  for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
+  if (parent) parent.appendChild(node);
+  return node;
+}
+function text(parent, x, y, str, attrs = {}) {
+  const t = el("text", { x, y, ...attrs }, parent);
+  t.textContent = str;
+  return t;
+}
+
+const tip = document.getElementById("tip");
+function showTip(evt, html) {
+  tip.innerHTML = html;
+  tip.style.display = "block";
+  const x = Math.min(evt.clientX + 14, window.innerWidth - tip.offsetWidth - 8);
+  tip.style.left = x + "px";
+  tip.style.top = evt.clientY + 14 + "px";
+}
+const hideTip = () => { tip.style.display = "none"; };
+
+/* ---------- Filtres ---------- */
+function buildFilters() {
+  const seg = document.getElementById("kpi-seg");
+  for (const [key, k] of Object.entries(KPI)) {
+    const b = document.createElement("button");
+    b.textContent = k.label;
+    b.dataset.kpi = key;
+    b.onclick = () => { state.kpi = key; render(); };
+    seg.appendChild(b);
+  }
+  const sel = document.getElementById("cat");
+  const names = ["Toutes", ...DATA.categories.map(c => c.category_name).filter(n => n !== "Toutes").sort()];
+  for (const n of names) {
+    const o = document.createElement("option");
+    o.value = n;
+    o.textContent = n === "Toutes" ? "Toutes (total magasin)" : n;
+    sel.appendChild(o);
+  }
+  sel.onchange = () => { state.cat = sel.value; render(); };
+}
+
+/* ---------- Tuiles KPI ---------- */
+function renderTiles() {
+  const c = cat(state.cat);
+  const tiles = document.getElementById("tiles");
+  tiles.innerHTML = "";
+  for (const [key, k] of Object.entries(KPI)) {
+    const n = c[key + "_N"], n1 = c[key + "_N1"], e = evol(n, n1);
+    const div = document.createElement("div");
+    div.className = "card tile";
+    div.innerHTML = `<div class="label">${k.label} N (${k.unit})</div>
+      <div class="value">${fmtVal(n)}</div>
+      <div class="delta">${fmtPct(e)} vs N-1 · écart ${fmtGap(n - n1)}
+      ${isAlert(e) ? '<span class="badge">⚠ Alerte</span>' : ""}</div>`;
+    tiles.appendChild(div);
+  }
+  const p = document.createElement("div");
+  p.className = "card tile";
+  p.innerHTML = `<div class="label">Part des ventes en promo</div>
+    <div class="value">${nf1.format(c.promo_share_N)} %</div>
+    <div class="delta">contre ${nf1.format(c.promo_share_N1)} % en N-1</div>`;
+  tiles.appendChild(p);
+}
+
+/* ---------- Barres : évolution vs N-1 par catégorie ---------- */
+function renderBars() {
+  const k = KPI[state.kpi];
+  document.getElementById("bars-title").textContent = `Évolution ${k.of} vs N-1, par catégorie`;
+  const rows = DATA.categories.filter(c => c.category_name !== "Toutes")
+    .map(c => ({ name: c.category_name, e: evol(c[state.kpi + "_N"], c[state.kpi + "_N1"]),
+                 n: c[state.kpi + "_N"], n1: c[state.kpi + "_N1"] }))
+    .sort((a, b) => a.e - b.e);
+  const svg = document.getElementById("bars");
+  svg.innerHTML = "";
+  const W = 560, labelW = 170, valW = 130, rowH = 38, top = 8, H = top + rows.length * rowH + 24;
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.setAttribute("aria-label", rows.map(r => `${r.name} ${fmtPct(r.e)}`).join(", "));
+  const lo = Math.min(DATA.threshold - 10, ...rows.map(r => r.e)), hi = Math.max(10, ...rows.map(r => r.e));
+  const x = v => labelW + ((v - lo) / (hi - lo)) * (W - labelW - valW);
+  // grille légère tous les 25 %
+  for (let t = Math.ceil(lo / 25) * 25; t <= hi; t += 25) {
+    el("line", { x1: x(t), x2: x(t), y1: top, y2: H - 20, stroke: "var(--border)" }, svg);
+    text(svg, x(t), H - 6, (t > 0 ? "+" : "") + t + " %", { "text-anchor": "middle", style: "fill:var(--text-muted);font-size:11px" });
+  }
+  rows.forEach((r, i) => {
+    const y = top + i * rowH;
+    const alert = isAlert(r.e);
+    const g = el("g", { class: "bar-row", tabindex: 0, role: "button",
+                        "aria-label": `${r.name} : ${fmtPct(r.e)}${alert ? ", alerte" : ""}` }, svg);
+    el("rect", { class: "hit", x: 0, y, width: W, height: rowH, fill: r.name === state.cat ? "var(--highlight)" : "transparent", rx: 4 }, g);
+    text(g, labelW - 10, y + rowH / 2 + 4, r.name, { "text-anchor": "end",
+         style: `fill:var(--text-primary);font-weight:${r.name === state.cat ? 600 : 400}` });
+    const x0 = x(0), x1 = x(r.e);
+    el("rect", { x: Math.min(x0, x1), y: y + 10, width: Math.max(Math.abs(x1 - x0), 1), height: rowH - 20, rx: 4,
+                 fill: alert ? "var(--critical)" : "var(--series-n)" }, g);
+    // étiquette à droite de la barre (ou du zéro si négatif) pour ne jamais toucher le nom
+    text(g, Math.max(x0, x1) + 6, y + rowH / 2 + 4, fmtPct(r.e) + (alert ? "  ⚠ Alerte" : ""),
+         { style: `fill:var(--text-primary);font-weight:${alert ? 600 : 400}` });
+    g.onclick = () => { state.cat = r.name; render(); };
+    g.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); g.onclick(); } };
+    g.onmousemove = e => showTip(e, `<b>${r.name}</b><br>N : ${fmtVal(r.n)} ${k.unit}<br>N-1 : ${fmtVal(r.n1)} ${k.unit}<br>Écart : ${fmtGap(r.n - r.n1)} (${fmtPct(r.e)})`);
+    g.onmouseleave = hideTip;
+  });
+  // axe zéro et seuil
+  el("line", { x1: x(0), x2: x(0), y1: top, y2: H - 20, stroke: "var(--axis)", "stroke-width": 1.5 }, svg);
+  el("line", { x1: x(DATA.threshold), x2: x(DATA.threshold), y1: top, y2: H - 20, stroke: "var(--critical)",
+               "stroke-dasharray": "4 3", "stroke-width": 1.5 }, svg);
+}
+
+/* ---------- Courbe mensuelle N vs N-1 ---------- */
+function renderLine() {
+  const k = KPI[state.kpi];
+  document.getElementById("line-title").textContent = `${k.label} mensuel : ${state.cat === "Toutes" ? "total magasin" : state.cat}`;
+  const pick = period => DATA.monthly.filter(m => m.category_name === state.cat && m.period === period)
+    .sort((a, b) => a.month.localeCompare(b.month)).map(m => m[state.kpi]);
+  const sN = pick("N"), sN1 = pick("N-1");
+  const svg = document.getElementById("line");
+  svg.innerHTML = "";
+  const W = 560, H = 270, L = 52, R = 12, T = 10, B = 26;
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  const max = Math.max(...sN, ...sN1) * 1.1;
+  const x = i => L + (i / 11) * (W - L - R), y = v => T + (1 - v / max) * (H - T - B);
+  for (let i = 0; i <= 4; i++) {
+    const v = (max / 4) * i;
+    el("line", { x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: i ? "var(--border)" : "var(--axis)" }, svg);
+    text(svg, L - 6, y(v) + 4, fmtVal(v), { "text-anchor": "end", style: "fill:var(--text-muted);font-size:11px" });
+  }
+  MONTHS.forEach((m, i) => text(svg, x(i), H - 8, m, { "text-anchor": "middle", style: "fill:var(--text-muted);font-size:11px" }));
+  const path = (s, color) => el("path", { d: s.map((v, i) => `${i ? "L" : "M"}${x(i)},${y(v)}`).join(""),
+                                          fill: "none", stroke: color, "stroke-width": 2, "stroke-linejoin": "round" }, svg);
+  path(sN1, "var(--series-n1)");
+  path(sN, "var(--series-n)");
+  svg.setAttribute("aria-label", `N : ${sN.map(fmtVal).join(", ")}. N-1 : ${sN1.map(fmtVal).join(", ")}`);
+  // survol : ligne verticale + infobulle
+  const cross = el("line", { y1: T, y2: H - B, stroke: "var(--axis)", visibility: "hidden" }, svg);
+  const dots = [el("circle", { r: 4, fill: "var(--series-n1)", stroke: "var(--surface-1)", "stroke-width": 2, visibility: "hidden" }, svg),
+                el("circle", { r: 4, fill: "var(--series-n)", stroke: "var(--surface-1)", "stroke-width": 2, visibility: "hidden" }, svg)];
+  const hit = el("rect", { x: L, y: T, width: W - L - R, height: H - T - B, fill: "transparent" }, svg);
+  hit.onmousemove = e => {
+    const box = svg.getBoundingClientRect();
+    const px = ((e.clientX - box.left) / box.width) * W;
+    const i = Math.max(0, Math.min(11, Math.round(((px - L) / (W - L - R)) * 11)));
+    cross.setAttribute("x1", x(i)); cross.setAttribute("x2", x(i)); cross.setAttribute("visibility", "visible");
+    [[dots[0], sN1[i]], [dots[1], sN[i]]].forEach(([d, v]) => {
+      d.setAttribute("cx", x(i)); d.setAttribute("cy", y(v)); d.setAttribute("visibility", "visible");
+    });
+    showTip(e, `<b>${MONTHS[i]}</b><br>N : ${fmtVal(sN[i])} ${k.unit}<br>N-1 : ${fmtVal(sN1[i])} ${k.unit}<br>${fmtPct(evol(sN[i], sN1[i]))}`);
+  };
+  hit.onmouseleave = () => { hideTip(); cross.setAttribute("visibility", "hidden"); dots.forEach(d => d.setAttribute("visibility", "hidden")); };
+}
+
+/* ---------- Écart par produit ---------- */
+function renderProducts() {
+  const k = KPI[state.kpi];
+  document.getElementById("prod-title").textContent =
+    `Écart ${k.of} vs N-1 par produit : ${state.cat === "Toutes" ? "tous produits" : state.cat}`;
+  const rows = DATA.products.filter(p => p.category_name === state.cat)
+    .map(p => ({ name: p.item_label, n: p[state.kpi + "_N"], n1: p[state.kpi + "_N1"], gap: p[state.kpi + "_N"] - p[state.kpi + "_N1"] }))
+    .sort((a, b) => Math.abs(b.gap) - Math.abs(a.gap)).slice(0, 8)
+    .sort((a, b) => a.gap - b.gap);
+  const svg = document.getElementById("prod");
+  svg.innerHTML = "";
+  const W = 1180, labelW = 230, valW = 260, rowH = 30, H = rows.length * rowH + 8;
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.setAttribute("aria-label", rows.map(r => `${r.name} ${fmtGap(r.gap)}`).join(", "));
+  const lo = Math.min(0, ...rows.map(r => r.gap)), hi = Math.max(0, ...rows.map(r => r.gap));
+  const x = v => labelW + 10 + ((v - lo) / (hi - lo || 1)) * (W - labelW - 10 - valW);
+  rows.forEach((r, i) => {
+    const y = 4 + i * rowH;
+    const g = el("g", {}, svg);
+    el("rect", { x: 0, y, width: W, height: rowH, fill: "transparent" }, g);
+    text(g, labelW - 10, y + rowH / 2 + 4, r.name, { "text-anchor": "end", style: "fill:var(--text-primary)" });
+    const x0 = x(0), x1 = x(r.gap);
+    el("rect", { x: Math.min(x0, x1), y: y + 7, width: Math.max(Math.abs(x1 - x0), 1), height: rowH - 14, rx: 4,
+                 fill: r.gap < 0 ? "var(--critical)" : "var(--series-n)" }, g);
+    text(g, Math.max(x0, x1) + 6, y + rowH / 2 + 4, `${fmtGap(r.gap)} ${k.unit} (${productEvol(r)})`,
+         { style: "fill:var(--text-primary)" });
+    g.onmousemove = e => showTip(e, `<b>${r.name}</b><br>N : ${fmtVal(r.n)} ${k.unit}<br>N-1 : ${fmtVal(r.n1)} ${k.unit}`);
+    g.onmouseleave = hideTip;
+  });
+  el("line", { x1: x(0), x2: x(0), y1: 0, y2: H, stroke: "var(--axis)", "stroke-width": 1.5 }, svg);
+}
+
+/* ---------- Tableau ---------- */
+function renderTable() {
+  const rows = [...DATA.categories].sort((a, b) => (a.category_name === "Toutes") - (b.category_name === "Toutes")
+    || evol(a.revenue_N, a.revenue_N1) - evol(b.revenue_N, b.revenue_N1));
+  let html = "<tr><th>Catégorie</th>" + Object.values(KPI).map(k => `<th>${k.label} N</th><th>Évol.</th>`).join("") + "</tr>";
+  for (const c of rows) {
+    html += `<tr><td>${c.category_name === "Toutes" ? "<b>Total magasin</b>" : c.category_name}</td>` +
+      Object.keys(KPI).map(key => {
+        const e = evol(c[key + "_N"], c[key + "_N1"]);
+        return `<td>${fmtVal(c[key + "_N"])}</td><td>${fmtPct(e)}${isAlert(e) ? " ⚠" : ""}</td>`;
+      }).join("") + "</tr>";
+  }
+  document.getElementById("table").innerHTML = html;
+}
+
+function render() {
+  document.getElementById("cat").value = state.cat;
+  document.querySelectorAll("#kpi-seg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.kpi === state.kpi));
+  renderTiles(); renderBars(); renderLine(); renderProducts();
+}
+
+function init() {
+  document.getElementById("period").textContent =
+    `12 derniers mois disponibles : N = ${DATA.period_N}, comparé à N-1 = ${DATA.period_N1}. Seuil d'alerte : baisse de ${-DATA.threshold} % ou plus.`;
+  const alerts = DATA.categories.filter(c => c.category_name !== "Toutes" && isAlert(evol(c.revenue_N, c.revenue_N1)));
+  const total = cat("Toutes");
+  document.getElementById("headline").innerHTML =
+    `<b>${alerts.length} catégorie${alerts.length > 1 ? "s" : ""} en alerte : ${alerts.map(a => `${a.category_name} (CA ${fmtPct(evol(a.revenue_N, a.revenue_N1))})`).join(", ")}.</b> ` +
+    `Le total magasin progresse de ${fmtPct(evol(total.revenue_N, total.revenue_N1))} : le problème est ciblé, pas global.`;
+  buildFilters();
+  renderTable();
+  render();
+}
+init();
+</script>
+</body>
+</html>
