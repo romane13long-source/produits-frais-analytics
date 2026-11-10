@@ -110,7 +110,7 @@ f = table_box(ax, 4.4, 5.6, "fact_sales", ["datetime", "date            (FK)", "
                                            "loss_cost_est", "margin_after_loss"], ORANGE, width=3.4)
 d = table_box(ax, 0.2, 6.6, "dim_date", ["date   (PK)", "year", "month", "weekday", "period (N / N-1)"], BLUE)
 pd_ = table_box(ax, 8.5, 6.6, "dim_product", ["item_code  (PK)", "item_name / item_label", "category_code (FK)",
-                                              "loss_rate_pct", "above_15_pct"], BLUE, width=3.3)
+                                              "loss_rate_pct", "loss_rate_to_check"], BLUE, width=3.3)
 c = table_box(ax, 8.5, 2.6, "dim_category", ["category_code (PK)", "category_name"], BLUE, width=3.3)
 link(ax, f["left"], d["right"], "N : 1")
 link(ax, f["right"], pd_["left"], "N : 1")
@@ -120,12 +120,15 @@ fig.savefig(IMAGES / "04_modele_etoile.png", dpi=150, bbox_inches="tight")
 # 5. Contrôle du résultat : écart de CA par catégorie
 kpi = pd.read_csv(GOLD / "kpi_category_n_vs_n1.csv").sort_values("revenue_gap")
 fig, ax = plt.subplots(figsize=(9, 3.8))
-colors = [ORANGE if v < 0 else BLUE for v in kpi["revenue_gap"]]
+colors = [ORANGE if alert else BLUE for alert in kpi["revenue_alert"]]
 ax.barh(kpi["category_name"], kpi["revenue_gap"] / 1000, color=colors, height=0.6)
 ax.axvline(0, color=MUTED, lw=1)
 for i, (gap, evo) in enumerate(zip(kpi["revenue_gap"], kpi["revenue_evol_pct"])):
     ax.text(gap / 1000 + (1.5 if gap > 0 else -1.5), i, f"{gap / 1000:+.1f} k ({evo:+.0f} %)",
             va="center", ha="left" if gap > 0 else "right", fontsize=9)
+for i, alert in enumerate(kpi["revenue_alert"]):
+    if alert:
+        ax.text(1.5, i, "Alerte : baisse > 15 %", va="center", fontsize=9, weight="bold")
 ax.set_xlim(-45, 85)
 ax.set_xlabel("Écart de CA N vs N-1 (milliers de RMB)")
 ax.set_title("Résultat Gold · Écart de CA par catégorie (07/22–06/23 vs 07/21–06/22)", loc="left", weight="bold")

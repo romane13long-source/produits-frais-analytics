@@ -16,8 +16,6 @@ df = df.drop(columns="item_name")
 
 # 0 % de perte sur un produit frais est peu crédible : on garde la valeur mais on la signale
 df["loss_rate_to_check"] = df["loss_rate_pct"].eq(0)
-# Seuil Comex : au-dessus de 15 % de perte
-df["above_15_pct"] = df["loss_rate_pct"].gt(15)
 
 df.to_csv(SILVER / "loss_rate.csv", index=False)
-print(f"loss_rate : {len(df)} produits, {df['loss_rate_to_check'].sum()} à 0 %, {df['above_15_pct'].sum()} au-dessus de 15 %")
+print(f"loss_rate : {len(df)} produits, {df['loss_rate_to_check'].sum()} à 0 %")

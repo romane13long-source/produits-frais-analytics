@@ -3,6 +3,9 @@ import pandas as pd
 
 from paths import GOLD, SILVER
 
+# Seuil Comex : une baisse vs N-1 est jugée significative à partir de -15 %
+ALERT_THRESHOLD_PCT = -15
+
 product = pd.read_csv(SILVER / "product.csv", dtype=str)
 loss = pd.read_csv(SILVER / "loss_rate.csv", dtype={"item_code": str})
 price = pd.read_csv(SILVER / "price.csv", dtype={"item_code": str}, parse_dates=["date"])
@@ -62,7 +65,9 @@ for col in ["revenue", "gross_margin", "margin_after_loss", "quantity_kg"]:
     kpi[f"{col}_N1"] = view[(col, "N-1")].round(0)
     kpi[f"{col}_gap"] = (view[(col, "N")] - view[(col, "N-1")]).round(0)
     kpi[f"{col}_evol_pct"] = ((view[(col, "N")] / view[(col, "N-1")] - 1) * 100).round(1)
+    kpi[f"{col}_alert"] = kpi[f"{col}_evol_pct"].le(ALERT_THRESHOLD_PCT)
 kpi = kpi.sort_values("revenue_gap")
 kpi.to_csv(GOLD / "kpi_category_n_vs_n1.csv")
 print(f"\nPériode N : {start_n:%Y-%m-%d} -> {end:%Y-%m-%d}")
-print(kpi[["revenue_N", "revenue_gap", "revenue_evol_pct", "gross_margin_evol_pct", "quantity_kg_evol_pct"]].to_string())
+print(kpi[["revenue_N", "revenue_gap", "revenue_evol_pct", "gross_margin_evol_pct", "quantity_kg_evol_pct",
+           "revenue_alert"]].to_string())
